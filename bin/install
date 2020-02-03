@@ -97,9 +97,9 @@ install_linkerd () {
 	local bin_install_path="${install_path}/bin"
 
 	curl -sSL "${download_url}" -o "${tempdir}/linkerd"
-	# if ! validate_checksum "${tempdir}/linkerd" $download_url ; then
-	# 	exit 1
-	# fi
+	if ! validate_checksum "${tempdir}/linkerd" $download_url ; then
+		exit 1
+	fi
 	mkdir -p "${bin_install_path}"
 	mv "${tempdir}/linkerd" "${bin_install_path}"
 	chmod +x "${bin_install_path}/linkerd"
