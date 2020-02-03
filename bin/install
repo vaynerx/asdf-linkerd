@@ -42,8 +42,36 @@ get_arch () {
 
 get_download_url() {
   local version="$1"
-  local platform="$2"
-  echo "https://get.helm.sh/helm-v${version}-${platform}.tar.gz"
+  local src_file="$2"
+  echo "https://github.com/linkerd/linkerd2/releases/download/${version}/${src_file}"
+}
+
+validate_checksum() {
+  filename=$1
+  SHA=$(curl -sfL "${url}.sha256")
+  echo ""
+  echo "Validating checksum..."
+
+  case $checksumbin in
+    *openssl)
+      checksum=$($checksumbin dgst -sha256 "${filename}" | sed -e 's/^.* //')
+      ;;
+    *shasum)
+      checksum=$($checksumbin -a256 "${filename}" | sed -e 's/^.* //')
+      ;;
+  esac
+
+  if [ "$checksum" != "$SHA" ]; then
+    echo "Checksum validation failed." >&2
+    return 1
+  fi
+  echo "Checksum valid."
+  return 0
+}
+
+checksumbin=$(command -v openssl) || checksumbin=$(command -v shasum) || {
+  echo "Failed to find checksum binary. Please install openssl or shasum."
+  exit 1
 }
 
 my_mktemp () {
@@ -63,21 +91,19 @@ install_helm () {
 	local platform=$(get_platform)
 	local arch=$(get_arch)
 	local tempdir=$(my_mktemp $platform)
-	local download_url=$(get_download_url $version $platform)
-	
+	local src_file="linkerd2-cli-${version}-${platform}"
+	local download_url=$(get_download_url $version $src_file)
 	local bin_install_path="$install_path/bin"
 
-	mkdir -p $bin_install_path
-	curl -sSL $download_url -o "${tempdir}/archive.tar.gz"
-	tar -C "$tempdir" -zxf "${tempdir}/archive.tar.gz"
-
-	if [ -f "${tempdir}/${platform}/tiller" ]; then
-		mv ${tempdir}/${platform}/tiller ${bin_install_path}/tiller
-		chmod +x "${bin_install_path}/tiller"
-	fi
-
-	mv ${tempdir}/${platform}/helm ${bin_install_path}/helm
-	chmod +x ${bin_install_path}/helm
+	(
+		curl -sSL $download_url -o "${tempdir}"
+		if ! validate_checksum "${src_file}"; then
+    		exit 1
+  		fi
+		mkdir -p $bin_install_path
+		mv ${tempdir}/${src_file} ${bin_install_path}/linkerd
+		chmod +x ${bin_install_path}/linkerd
+	)
 
 	rm -rf $tempdir 
 }
