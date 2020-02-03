@@ -93,18 +93,19 @@ install_helm () {
 	local tempdir=$(my_mktemp $platform)
 	local src_file="linkerd2-cli-${version}-${platform}"
 	local download_url=$(get_download_url $version $src_file)
-	local bin_install_path="$install_path/bin"
+	local bin_install_path="${install_path}/bin"
 
-	(
-		curl -sSL $download_url -o "${tempdir}"
+	(	
+		curl -sSL "${download_url}" -o "${tempdir}/${src_file}"
 		if ! validate_checksum "${src_file}"; then
     		exit 1
   		fi
-		mkdir -p $bin_install_path
-		mv ${tempdir}/${src_file} ${bin_install_path}/linkerd
-		chmod +x ${bin_install_path}/linkerd
+		mkdir -p "${bin_install_path}"
+		mv "${tempdir}/${src_file}" "${bin_install_path}/linkerd-${version}"
+		chmod +x "${bin_install_path}/linkerd-${version}"
+		ln -s "${bin_install_path}/linkerd-${version}" "${bin_install_path}/linkerd"
 	)
-
+	
 	rm -rf $tempdir 
 }
 
