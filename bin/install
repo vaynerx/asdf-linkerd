@@ -19,7 +19,7 @@ get_platform () {
 			;;
 	esac
 
-	echo -n ${platform}-amd64
+	echo -n ${platform}
 }
 
 get_arch () {
@@ -48,6 +48,7 @@ get_download_url() {
 
 validate_checksum() {
   filename=$1
+  url=$2
   SHA=$(curl -sfL "${url}.sha256")
   echo ""
   echo "Validating checksum..."
@@ -96,14 +97,13 @@ install_helm () {
 	local bin_install_path="${install_path}/bin"
 
 	(	
-		curl -sSL "${download_url}" -o "${tempdir}/${src_file}"
-		if ! validate_checksum "${src_file}"; then
+		curl -sSL "${download_url}" -o "${tempdir}/linkerd"
+		if ! validate_checksum "${tempdir}/linkerd" $download_url ; then
     		exit 1
   		fi
 		mkdir -p "${bin_install_path}"
-		mv "${tempdir}/${src_file}" "${bin_install_path}/linkerd-${version}"
-		chmod +x "${bin_install_path}/linkerd-${version}"
-		ln -s "${bin_install_path}/linkerd-${version}" "${bin_install_path}/linkerd"
+		mv "${tempdir}/linkerd" "${bin_install_path}"
+		chmod +x "${bin_install_path}/linkerd"
 	)
 	
 	rm -rf $tempdir 
