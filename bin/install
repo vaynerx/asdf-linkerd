@@ -78,9 +78,9 @@ checksumbin=$(command -v openssl) || checksumbin=$(command -v shasum) || {
 my_mktemp () {
 	local tempdir=""
 	if [ "linux" = "$1" ] ; then
-		tempdir=$(mktemp -d asdf-helm.XXXX)
+		tempdir=$(mktemp -d asdf-linkerd.XXXX)
 	else
-		tempdir=$(mktemp -dt asdf-helm.XXXX)
+		tempdir=$(mktemp -dt asdf-linkerd.XXXX)
 	fi
 	echo -n $tempdir
 }
