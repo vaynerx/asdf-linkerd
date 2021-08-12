@@ -6,7 +6,7 @@ linkerd plugin for [asdf](https://github.com/asdf-vm/asdf) version manager
 ## Install
 
 ```
-asdf plugin-add linkerd https://github.com/team-gary/asdf-linkerd.git
+asdf plugin-add linkerd https://github.com/bryncooke/asdf-linkerd.git
 ```
 
 ## Use
